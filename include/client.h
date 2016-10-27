@@ -4,8 +4,9 @@
 #include "common.h"
 
 struct client_t {
-    int socket_connected;
-    char buffer[BUFFER_SIZE];
+    int family;         // AF_INET or AF_INET6
+    int socket_connected;   // socket connected to server
+    char buffer[BUFFER_SIZE];   // buffer used for messages to receive/send
 };
 
 /* send message */

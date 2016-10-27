@@ -23,7 +23,7 @@ void start_server(struct server_t *server)
 
     // accept
     struct sockaddr_storage addr;
-    accept_connection(server->socket_connected, &addr);
+    accept_connection(server->socket_listening, &addr);
 
 }
 

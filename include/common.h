@@ -13,10 +13,13 @@
 #include <string.h>
 #include <sys/socket.h>
 #include <sys/types.h>
+#include <arpa/inet.h>
 #include <netdb.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <assert.h>
+#include <errno.h>
 
 void initialize_hints(struct addrinfo *hints, int flags);
 void get_addrinfo_list(const char *hostname, const char *port_number, struct
