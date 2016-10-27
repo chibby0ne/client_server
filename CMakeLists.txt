@@ -18,3 +18,4 @@ message("HEADERS = ${HEADERS}")
 include_directories(${INCLUDE_DIR})
 
 add_executable(${PROJECT_NAME} ${SOURCES} ${HEADERS})
+set_property(TARGET ${PROJECT_NAME} PROPERTY C_STANDARD 99)
