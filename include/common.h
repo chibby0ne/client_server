@@ -30,6 +30,12 @@ int find_connectable_socket(struct addrinfo *addrinfo);
 int find_socket(struct addrinfo *res);
 int connect_through_socket(int socketfd, struct addrinfo *res);
 void listen_socket(int socketfd, int backlog);
-void accept_connection(int socketfd, struct sockaddr_storage *addr);
+int accept_connection(int socketfd, struct sockaddr_storage *addr);
+
+
+int receive_message(void *object, int type);
+void send_message(void *object, int type);
+void show_message(char *buffer, int type);
+void read_send_messages(char *buffer);
 
 #endif /* ifndef GUARD_COMMON_H */

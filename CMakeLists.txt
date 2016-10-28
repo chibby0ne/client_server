@@ -6,8 +6,8 @@ project(${PROJECT_NAME})
 message("CMAKE_SOURCE_DIR = ${CMAKE_SOURCE_DIR}")
 
 set(INCLUDE_DIR ${CMAKE_SOURCE_DIR}/include)
-message("INCLUDE_DIR = ${INCLUDE_DIR}")
 set(SOURCE_DIR ${CMAKE_SOURCE_DIR}/src)
+message("INCLUDE_DIR = ${INCLUDE_DIR}")
 message("SOURCE_DIR = ${SOURCE_DIR}")
 
 set(SOURCES ${SOURCE_DIR}/client.c ${SOURCE_DIR}/server.c ${SOURCE_DIR}/client_server.c ${SOURCE_DIR}/common.c)

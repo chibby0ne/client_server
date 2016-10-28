@@ -27,11 +27,3 @@ void disconnect(struct client_t *client)
 {
     close(client->socket_connected);
 }
-
-
-void send_message(struct client_t *client)
-{
-    if (send(client->socket_connected, client->buffer, BUFFER_SIZE, 0) == -1) {
-        perror("send message");
-    }
-}

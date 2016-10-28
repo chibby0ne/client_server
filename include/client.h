@@ -6,11 +6,9 @@
 struct client_t {
     int family;         // AF_INET or AF_INET6
     int socket_connected;   // socket connected to server
-    char buffer[BUFFER_SIZE];   // buffer used for messages to receive/send
+    char recv_buffer[BUFFER_SIZE];   // buffer used for messages to receive
+    char send_buffer[BUFFER_SIZE];   // buffer used for messages to send
 };
-
-/* send message */
-void send_message(struct client_t *client);
 
 /* connect */
 int connect_to_server(char *hostname, struct client_t *client);

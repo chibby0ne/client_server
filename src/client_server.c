@@ -1,3 +1,4 @@
+#include "common.h"
 #include "client.h"
 #include "server.h"
 #include <stdio.h>
@@ -30,7 +31,9 @@ void print_error_exit()
 int is_valid_ip(char *s)
 {
     struct sockaddr_in sa;
-    int ret = inet_pton(AF_INET, s, &(sa.sin_addr));
+    struct sockaddr_in6 sa6;
+    int ret = inet_pton(AF_INET, s, &(sa.sin_addr)) ||
+            inet_pton(AF_INET6, s, &(sa6.sin6_addr));
     return ret == 1;
 }
 
@@ -92,5 +95,22 @@ int main(int argc, char *argv[])
         start_server(server);
     }
     printf("Made a connection/Started server\n");
+
+    int status = 1;
+    if (mode == CLIENT) {
+        while (status > 0) {
+            read_send_messages(client->send_buffer);
+            send_message(client, CLIENT);
+            status = receive_message(client, CLIENT);
+            show_message(client->recv_buffer, CLIENT);
+        }
+    } else {
+        while (status > 0) {
+            status = receive_message(server, SERVER);
+            read_send_messages(server->send_buffer);
+            send_message(server, SERVER);
+            show_message(server->recv_buffer, SERVER);
+        }
+    }
     return 0;
 }

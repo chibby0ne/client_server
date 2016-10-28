@@ -1,4 +1,7 @@
 #include "common.h"
+#include "client.h"
+#include "server.h"
+
 
 void print_ip(struct addrinfo *res)
 {
@@ -123,7 +126,18 @@ void bind_socket(int socketfd, struct addrinfo *res)
     int ret = bind(socketfd, res->ai_addr, res->ai_addrlen);
     if (ret == -1) {
         perror("bind_socket-bind()");
-        exit(EXIT_FAILURE);
+        if (errno == EADDRINUSE) {
+            int yes = 1;
+
+            if (setsockopt(socketfd, SOL_SOCKET, SO_REUSEADDR, &yes,
+                        sizeof(int)) == -1) {
+                perror("setsockopt");
+                exit(1);
+            }
+            printf("freeing port %s...\n", PORT_NUMBER);
+        } else {
+            exit(EXIT_FAILURE);
+        }
     }
 }
 
@@ -138,7 +152,7 @@ void listen_socket(int socketfd, int backlog)
     }
 }
 
-void accept_connection(int socketfd, struct sockaddr_storage *addr)
+int accept_connection(int socketfd, struct sockaddr_storage *addr)
 {
     assert(socketfd != -1);
     printf("accepting connections...\n");
@@ -149,4 +163,83 @@ void accept_connection(int socketfd, struct sockaddr_storage *addr)
         perror("accept_connection-accept()");
         exit(EXIT_FAILURE);
     }
+    assert(new_socket != -1);
+    return new_socket;
+}
+
+int receive_message(void *object, int type)
+{
+    int status = 0;
+    struct client_t *client;
+    struct server_t *server;
+    switch (type) {
+        case CLIENT:
+            client = (struct client_t *) object;
+            status = recv(client->socket_connected, &(client->recv_buffer),
+                    BUFFER_SIZE, 0);
+            break;
+        case SERVER:
+            server = (struct server_t *) object;
+            status = recv(server->socket_connected, &(server->recv_buffer),
+                    BUFFER_SIZE, 0);
+            break;
+        default:
+            fprintf(stderr, "This is an unsupported mode of operation\n");
+            exit(EXIT_FAILURE);
+    }
+    if (status == -1) {
+        perror("receive_message-recv()");
+    }
+    return status;
+}
+
+void send_message(void *object, int type)
+{
+    int status;
+    struct client_t *client;
+    struct server_t *server;
+    switch (type) {
+        case CLIENT:
+            client = (struct client_t *) object;
+            status = send(client->socket_connected, &(client->send_buffer),
+                    BUFFER_SIZE, 0);
+            break;
+        case SERVER:
+            server = (struct server_t *) object;
+            status = send(server->socket_connected, &(server->send_buffer),
+                    BUFFER_SIZE, 0);
+            break;
+        default:
+            fprintf(stderr, "This is an unsupported mode of operation\n");
+            exit(EXIT_FAILURE);
+    }
+    if (status == -1) {
+        perror("send_message-send()");
+    }
+}
+
+
+/**
+ * Prints message to console, and prepends a "From server/client" depending on
+ * which type of program it is running as i.e: if it is running as a client,
+ * then the message must come from the server
+ *
+ * @param buffer char array where the message is stored
+ * @param type CLIENT or SERVER int macros
+ */
+void show_message(char *buffer, int type)
+{
+    printf("%s %s", type == CLIENT ? "From server:" : "From client:", buffer);
+}
+
+/**
+ * Reads strings from stdin and stores it in a buffer up to the EOF or the
+ * newline character, if newline character is inputted it is also included in
+ * the message stored in the buffer
+ *
+ * @param buffer char array whre the message is stored
+ */
+void read_send_messages(char *buffer)
+{
+    fgets(buffer, BUFFER_SIZE, stdin);
 }

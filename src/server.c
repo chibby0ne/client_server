@@ -23,19 +23,8 @@ void start_server(struct server_t *server)
 
     // accept
     struct sockaddr_storage addr;
-    accept_connection(server->socket_listening, &addr);
+    server->socket_connected = 0;
+    server->socket_connected = accept_connection(server->socket_listening,&addr);
+    assert(server->socket_connected > -1);
 
-}
-
-
-void receive_message(struct server_t *server)
-{
-    if (recv(server->socket_connected, (void *) &(server->buffer), BUFFER_SIZE, 0) == -1) {
-        perror("receive_message-recv()");
-    }
-}
-
-void show_message(struct server_t *server)
-{
-    printf("%s\n", server->buffer);
 }
