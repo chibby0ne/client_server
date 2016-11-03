@@ -3,6 +3,6 @@
 
 ## TODO
 
-- Refactor find_socket, find_connectable_socket functions in common.c
-- Don't close connection after being connected
-
+[ ] Refactor
+[ ] Add comments to code
+[ ] Add full-duplex communication by using threads (asynchronous messages)

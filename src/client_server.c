@@ -28,6 +28,8 @@ void print_error_exit()
 
 }
 
+/**
+ * Checks if the string corresponds to a real ip address or not */
 int is_valid_ip(char *s)
 {
     struct sockaddr_in sa;
