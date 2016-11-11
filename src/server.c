@@ -1,5 +1,8 @@
 #include "server.h"
 
+/**
+ * Starts the server
+ */
 void start_server(struct server_t *server)
 {
     struct addrinfo hints;
@@ -26,5 +29,4 @@ void start_server(struct server_t *server)
     server->socket_connected = 0;
     server->socket_connected = accept_connection(server->socket_listening,&addr);
     assert(server->socket_connected > -1);
-
 }

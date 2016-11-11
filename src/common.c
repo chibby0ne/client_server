@@ -2,7 +2,11 @@
 #include "client.h"
 #include "server.h"
 
-
+/**
+ * Helper function that prints the ip address from a struct addrinfo to stderr
+ *
+ * @param res pointer to structure holding the ip address
+ */
 void print_ip(struct addrinfo *res)
 {
     char ipstr[INET6_ADDRSTRLEN];
@@ -17,6 +21,15 @@ void print_ip(struct addrinfo *res)
 
 }
 
+/**
+ * Initializes the hints structure passed as parameters. according to the flag
+ * parameters passed. The family choosen is unspecified i.e: could be either
+ * IPv4 or IPv6, and the socket type choosen is a SOCK_STREAM.
+ *
+ * @param hints structure when the hints are hold
+ * @param flag used to initialize the flags, for our purposes either SERVER or
+ * CLIENT
+ */
 void initialize_hints(struct addrinfo *hints, int flag)
 {
     assert(flag == SERVER || flag == CLIENT);
@@ -29,6 +42,19 @@ void initialize_hints(struct addrinfo *hints, int flag)
     }
 }
 
+/**
+ * Invokes the getaddrinfo function to get the addressinfo structure res
+ * obtained for the given hostname, the given port_number and the hints
+ * structure passed.
+ * Function fails and the program exits when there's an error with the
+ * getaddrinfo function
+ *
+ * @param hostname hostname or IP address
+ * @param port_number port number to listen/connect to
+ * @param hints addrinfo structure that holds the hints for the type of
+ * addrinfo structure we want
+ * @param res resulting addrinfo structure using the parameters
+ */
 void get_addrinfo_list(const char *hostname, const char *port_number, struct
         addrinfo *hints, struct addrinfo **res)
 {
@@ -44,6 +70,18 @@ void get_addrinfo_list(const char *hostname, const char *port_number, struct
     assert(status == 0);
 }
 
+/**
+ *
+ * Finds and returns the first connectable socket using the addrinfo structure
+ * provided.
+ * It iterates over the available addrinfo structures pointed by res beginning
+ * from res.
+ * Function fails and exits the program if it could not find a connectable
+ *
+ * @param res addrinfo structure that includes the family, socket type and
+ * protocol to be used for the socket
+ * @return the connectable socket
+ */
 int find_connectable_socket(struct addrinfo *res)
 {
     assert(res != NULL);
@@ -69,6 +107,15 @@ int find_connectable_socket(struct addrinfo *res)
     exit(EXIT_FAILURE);
 }
 
+/**
+ * Finds and returns the first socket found from the addrinfo structure res
+ * NOTE: This socket may or may not be connectable. For a connectable socket
+ * @see find_connectable_socket
+ *
+ * @param res structure holding the chain of addrinfo strucutres containing the
+ * parameters necessary for the creation of a socket
+ * @return the socket
+ */
 int find_socket(struct addrinfo *res)
 {
     assert(res != NULL);
@@ -94,6 +141,11 @@ int find_socket(struct addrinfo *res)
     exit(EXIT_FAILURE);
 }
 
+/** 
+ * Tries to connect the given socketfd using the information contained in res
+ * 
+ * @return 0 on success, -1 otherwise
+ */
 int connect_through_socket(int socketfd, struct addrinfo *res)
 {
     assert(socketfd != -1);
@@ -118,6 +170,17 @@ int connect_through_socket(int socketfd, struct addrinfo *res)
 
 }
 
+/**
+ * Binds the given socket to the port PORT_NUMBER, that was specifed when
+ * obtaining the res structure.
+ * This function is mostly used when want to create a server, as it is necessary
+ * to bind the socket before starting to listen to incomming connections.
+ * Fails and exits the program if an error occure while calling the bind
+ * function on the socket
+ *
+ * @param socketfd socket used for conections
+ * @param res structure that holds the parameters required to bind socketfd
+ */
 void bind_socket(int socketfd, struct addrinfo *res)
 {
     assert(socketfd != -1);
@@ -126,9 +189,11 @@ void bind_socket(int socketfd, struct addrinfo *res)
     int ret = bind(socketfd, res->ai_addr, res->ai_addrlen);
     if (ret == -1) {
         perror("bind_socket-bind()");
+        // if the port is not in use for we get from the kernel that it is in
+        // use, it is because it takes a while for the kernel to release the
+        // port again, but this forces it to release it
         if (errno == EADDRINUSE) {
             int yes = 1;
-
             if (setsockopt(socketfd, SOL_SOCKET, SO_REUSEADDR, &yes,
                         sizeof(int)) == -1) {
                 perror("setsockopt");
@@ -141,6 +206,16 @@ void bind_socket(int socketfd, struct addrinfo *res)
     }
 }
 
+/**
+ * Listens to incomming using the socket socketfd, and holds a maximum number of
+ * connections in queue of backlog
+ * Fails and exits the program if there's an error while calling the listen
+ * function on the socket
+ *
+ * @param socket used for incomming connections
+ * @param backlog max number of incomming connections to be queued.
+ */
+
 void listen_socket(int socketfd, int backlog)
 {
     assert(socketfd != -1);
@@ -152,6 +227,16 @@ void listen_socket(int socketfd, int backlog)
     }
 }
 
+/**
+ * Wrapper for the accept function, that accepts an incoming connections from
+ * the queue of incomming connections to socketfd, and stores the address of the
+ * client into addr structure. It creates a socket with the accepted connnection
+ * and the original socketfd remains open listening for more connections.
+ *
+ * @param socketfd listening socket that has a connection pending from a client
+ * @param addr sockaddr_storage structure used to hold the address of the client 
+ * @return the new socket that is connected to the remote socket 
+ */
 int accept_connection(int socketfd, struct sockaddr_storage *addr)
 {
     assert(socketfd != -1);
@@ -167,6 +252,14 @@ int accept_connection(int socketfd, struct sockaddr_storage *addr)
     return new_socket;
 }
 
+/**
+ * Handles the reception of messages from a either a client or a server, using a
+ * connected socket contained inside object, that is of the given type.
+ *
+ * @param object client or server containing the connected socket
+ * @param type indicates whether the object is a CLIENT or SERVER type
+ * @return error status of the recv function call
+ */
 int receive_message(void *object, int type)
 {
     int status = 0;
@@ -193,6 +286,14 @@ int receive_message(void *object, int type)
     return status;
 }
 
+/**
+ * Handles the sending of messages from either a client or a server, using a
+ * connected socket contained insde boject, that is of the given type.
+ *
+ * @param object client or server containing the connected socket
+ * @param type indicates whether the object is a CLIENT or SERVER type
+ * @return error status of the recv function call
+ */
 void send_message(void *object, int type)
 {
     int status;
@@ -242,4 +343,113 @@ void show_message(char *buffer, int type)
 void read_send_messages(char *buffer)
 {
     fgets(buffer, BUFFER_SIZE, stdin);
+}
+
+/** 
+ * Helper function used to create and return a string, which is a copy of the
+ * string s but in which all alphabetical characters are lower case
+ *
+ * @param s string with characters in lower and/or upper case
+ * @return string with characters in lower case
+ */
+char *convert_to_lowercase(char *s)
+{
+    size_t len = sizeof(s);
+    char *new_s = (char *) malloc(len);
+    for (u_int32_t i = 0; i < len; ++i) {
+        new_s[i] = tolower(s[i]);
+    }
+    return new_s;
+}
+
+/**
+ * Helper function used for showing fatal error messages on stderr
+ */
+void print_error_exit()
+{
+    fprintf(stderr, 
+            "Usage: client_server MODE [IP]\n MODE: \"client\" or " 
+            "\"server\"\n IP: only used for client mode (could be IP or "
+            "hostname)\n");
+    exit(EXIT_FAILURE);
+
+}
+
+/**
+ * Checks if the string corresponds to a valid ip address
+ *
+ * @param s contains the ip address
+ * @return 1 if s is valid, 0 otherwise
+ */
+int is_valid_ip(char *s)
+{
+    struct sockaddr_in sa;
+    struct sockaddr_in6 sa6;
+    int ret = inet_pton(AF_INET, s, &(sa.sin_addr)) ||
+            inet_pton(AF_INET6, s, &(sa6.sin6_addr));
+    return ret == 1;
+}
+
+/**
+ * Checks if the s contains only alphabetical characters
+ *
+ * @param s contains the hostname of the server to connect to
+ * @return 1 if s contains only alphabetical characters, 0 otherwise
+ */
+int has_alpha_only(char *s)
+{
+    size_t len = sizeof(s);
+    for (u_int32_t i = 0; i < len; ++i) {
+        if (!isalpha(s[i])) {
+            return 0;
+        }
+    }
+    return 1;
+}
+
+/**
+ * Prints the command line parameters to stdout, including the executable name
+ *
+ * @param argc number of command line arguments (including the executable)
+ * @param argv array of strings representing command line arguments
+ */
+void print_cla(int argc, char *argv[])
+{
+    for (u_int32_t i = 0; i < argc; ++i) {
+        printf("argv[%d] = %s\n", i, argv[i]);
+    }
+}
+
+/**
+ * Checks the command line arguments, validates them, and returns the mode
+ * chosen for the current program.
+ *
+ * @param argc number of parameters (including executable name)
+ * @param argv array of command line parameters
+ * @return the mode to use the program (CLIENT or SERVER)
+ */
+int handle_input(int argc, char *argv[])
+{
+    int mode;
+    if (argc < 2 || argc > 3) {
+        print_cla(argc, argv);
+        print_error_exit();
+    } else {
+        if (strcmp("client", convert_to_lowercase(argv[1])) == 0) {
+            mode = CLIENT;
+        } else if (strcmp("server", convert_to_lowercase(argv[1])) == 0) {
+            mode = SERVER;
+        } else {
+            print_cla(argc, argv);
+            print_error_exit();
+        }
+        if (argc == 3) {
+            if (!is_valid_ip(argv[2]) && !has_alpha_only(argv[2])) {
+                print_cla(argc, argv);
+                print_error_exit();
+            }
+        }
+    }
+    return mode;
+
 }

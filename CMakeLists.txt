@@ -1,7 +1,6 @@
 cmake_minimum_required(VERSION 3.0)
 
-set(PROJECT_NAME client_server)
-project(${PROJECT_NAME})
+project(${PROJECT_NAME} client_server)
 
 message("CMAKE_SOURCE_DIR = ${CMAKE_SOURCE_DIR}")
 

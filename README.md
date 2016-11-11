@@ -4,5 +4,5 @@
 ## TODO
 
 [ ] Refactor
-[ ] Add comments to code
+[x] Add comments to code
 [ ] Add full-duplex communication by using threads (asynchronous messages)

@@ -20,6 +20,7 @@
 #include <unistd.h>
 #include <assert.h>
 #include <errno.h>
+#include <ctype.h>
 
 void initialize_hints(struct addrinfo *hints, int flags);
 void get_addrinfo_list(const char *hostname, const char *port_number, struct
@@ -38,4 +39,9 @@ void send_message(void *object, int type);
 void show_message(char *buffer, int type);
 void read_send_messages(char *buffer);
 
+char *convert_to_lowercase(char *s);
+void print_error_exit();
+int is_valid_ip(char *s);
+int has_alpha_only(char *s);
+int handle_input(int argc, char *argv[]);
 #endif /* ifndef GUARD_COMMON_H */
