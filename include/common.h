@@ -35,7 +35,7 @@ int accept_connection(int socketfd, struct sockaddr_storage *addr);
 
 
 int receive_message(void *object, int type);
-void send_message(void *object, int type);
+int send_message(void *object, int type);
 void show_message(char *buffer, int type);
 void read_send_messages(char *buffer);
 

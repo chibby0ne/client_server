@@ -16,21 +16,22 @@ int main(int argc, char *argv[])
     }
     printf("Made a connection/Started server\n");
 
-    int status = 1;
+    int send_status;
+    int recv_status;
     if (mode == CLIENT) {
-        while (status > 0) {
+        do {
             read_send_messages(client->send_buffer);
-            send_message(client, CLIENT);
-            status = receive_message(client, CLIENT);
+            send_status = send_message(client, CLIENT);
+            recv_status = receive_message(client, CLIENT);
             show_message(client->recv_buffer, CLIENT);
-        }
+        } while (send_status > 0 || recv_status > 0);
     } else {
-        while (status > 0) {
-            status = receive_message(server, SERVER);
+        do {
             read_send_messages(server->send_buffer);
-            send_message(server, SERVER);
+            send_status = send_message(server, SERVER);
+            recv_status = receive_message(server, SERVER);
             show_message(server->recv_buffer, SERVER);
-        }
+        } while (send_status > 0 || recv_status > 0);
     }
     return 0;
 }

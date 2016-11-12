@@ -294,7 +294,7 @@ int receive_message(void *object, int type)
  * @param type indicates whether the object is a CLIENT or SERVER type
  * @return error status of the recv function call
  */
-void send_message(void *object, int type)
+int send_message(void *object, int type)
 {
     int status;
     struct client_t *client;
@@ -317,6 +317,7 @@ void send_message(void *object, int type)
     if (status == -1) {
         perror("send_message-send()");
     }
+    return status;
 }
 
 
