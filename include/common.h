@@ -22,6 +22,17 @@
 #include <errno.h>
 #include <ctype.h>
 
+struct client_recv_status_t {
+    struct client_t *client;
+    int *recv_status;
+};
+
+struct server_recv_status_t {
+    struct server_t *server;
+    int *recv_status;
+};
+
+
 void initialize_hints(struct addrinfo *hints, int flags);
 void get_addrinfo_list(const char *hostname, const char *port_number, struct
         addrinfo *hints, struct addrinfo **res);
@@ -37,7 +48,10 @@ int accept_connection(int socketfd, struct sockaddr_storage *addr);
 int receive_message(void *object, int type);
 int send_message(void *object, int type);
 void show_message(char *buffer, int type);
-void read_send_messages(char *buffer);
+void read_stdin_to_buffer(char *buffer);
+
+void *read_received_message_client(void *client_param);
+void *read_received_message_server(void *server_param);
 
 char *convert_to_lowercase(char *s);
 void print_error_exit();

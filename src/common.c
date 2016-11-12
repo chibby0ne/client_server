@@ -255,6 +255,8 @@ int accept_connection(int socketfd, struct sockaddr_storage *addr)
 /**
  * Handles the reception of messages from a either a client or a server, using a
  * connected socket contained inside object, that is of the given type.
+ * In case there's an error, the function prints out an error message to
+ * stderr describing the problem.
  *
  * @param object client or server containing the connected socket
  * @param type indicates whether the object is a CLIENT or SERVER type
@@ -289,6 +291,8 @@ int receive_message(void *object, int type)
 /**
  * Handles the sending of messages from either a client or a server, using a
  * connected socket contained insde boject, that is of the given type.
+ * In case there's an error, the function prints out an error message to
+ * stderr describing the problem.
  *
  * @param object client or server containing the connected socket
  * @param type indicates whether the object is a CLIENT or SERVER type
@@ -320,7 +324,6 @@ int send_message(void *object, int type)
     return status;
 }
 
-
 /**
  * Prints message to console, and prepends a "From server/client" depending on
  * which type of program it is running as i.e: if it is running as a client,
@@ -341,9 +344,49 @@ void show_message(char *buffer, int type)
  *
  * @param buffer char array whre the message is stored
  */
-void read_send_messages(char *buffer)
+void read_stdin_to_buffer(char *buffer)
 {
     fgets(buffer, BUFFER_SIZE, stdin);
+}
+
+/**
+ * Read strings from stdint and sends them throught the connected socket of the
+ * given client. This is the function handled by the recv_thread.
+ *
+ * @param client a structure containing the server and the status used to break
+ * from the main loop
+ */
+void *read_received_message_client(void *client_param)
+{
+    struct client_recv_status_t *client_recv_status = (struct client_recv_status_t *)
+        client_param;
+    struct client_t *client = client_recv_status->client;
+    int *status = client_recv_status->recv_status;
+    do {
+        *status = receive_message(client, CLIENT);
+        show_message(client->recv_buffer, CLIENT);
+    } while (*status > 0);
+    return NULL;
+}
+
+/**
+ * Read strings from stdint and sends them throught the connected socket of the
+ * given server. This is the function handled by the recv_thread.
+ *
+ * @param server a structure containing the server and the status used to break
+ * from the main loop
+ */
+void *read_received_message_server(void *server_param)
+{
+    struct server_recv_status_t *server_recv_status = (struct server_recv_status_t *)
+        server_param;
+    struct server_t *server = server_recv_status->server;
+    int *status = server_recv_status->recv_status;
+    do {
+        *status = receive_message(server, SERVER);
+        show_message(server->recv_buffer, SERVER);
+    } while (*status > 0);
+    return NULL;
 }
 
 /** 
