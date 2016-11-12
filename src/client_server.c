@@ -1,6 +1,9 @@
 #include "common.h"
 #include "client.h"
 #include "server.h"
+
+#include <stdio.h>
+#include <stdlib.h>
 #include <pthread.h>
 
 int main(int argc, char *argv[])

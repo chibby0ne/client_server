@@ -3,7 +3,7 @@
 /**
  * Connects the given client to a server on the given hostname/IP
  *
- * @param a hostname or ip address
+ * @param a hostname or ip address (can be either IPv6 or IPv4)
  * @return a connected socket
  */
 int connect_to_server(char *hostname, struct client_t *client)

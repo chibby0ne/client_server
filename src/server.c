@@ -1,7 +1,12 @@
 #include "server.h"
 
 /**
- * Starts the server
+ * Starts the server, listening for connections until one is
+ * accepted. The server structure passed is initialized and contains all the
+ * relevant information.
+ *
+ * @param server server_t instance that holds all the information to maintain
+ * the communication and transmission of messages to/from the client
  */
 void start_server(struct server_t *server)
 {

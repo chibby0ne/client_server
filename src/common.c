@@ -3,25 +3,6 @@
 #include "server.h"
 
 /**
- * Helper function that prints the ip address from a struct addrinfo to stderr
- *
- * @param res pointer to structure holding the ip address
- */
-void print_ip(struct addrinfo *res)
-{
-    char ipstr[INET6_ADDRSTRLEN];
-    if (res->ai_family ==  AF_INET) {
-        struct sockaddr_in *ipv4 = (struct sockaddr_in *) res->ai_addr;
-        inet_ntop(AF_INET, &(ipv4->sin_addr), ipstr, sizeof(ipstr));
-    } else {
-        struct sockaddr_in6 *ipv6 = (struct sockaddr_in6 *) res->ai_addr;
-        inet_ntop(AF_INET6, &(ipv6->sin6_addr), ipstr, sizeof(ipstr));
-    }
-    fprintf(stderr, "%s\n", ipstr);
-
-}
-
-/**
  * Initializes the hints structure passed as parameters. according to the flag
  * parameters passed. The family choosen is unspecified i.e: could be either
  * IPv4 or IPv6, and the socket type choosen is a SOCK_STREAM.
@@ -171,6 +152,24 @@ int connect_through_socket(int socketfd, struct addrinfo *res)
 }
 
 /**
+ * Helper function that prints the ip address from a struct addrinfo to stderr
+ *
+ * @param res pointer to structure holding the ip address
+ */
+void print_ip(struct addrinfo *res)
+{
+    char ipstr[INET6_ADDRSTRLEN];
+    if (res->ai_family ==  AF_INET) {
+        struct sockaddr_in *ipv4 = (struct sockaddr_in *) res->ai_addr;
+        inet_ntop(AF_INET, &(ipv4->sin_addr), ipstr, sizeof(ipstr));
+    } else {
+        struct sockaddr_in6 *ipv6 = (struct sockaddr_in6 *) res->ai_addr;
+        inet_ntop(AF_INET6, &(ipv6->sin6_addr), ipstr, sizeof(ipstr));
+    }
+    fprintf(stderr, "%s\n", ipstr);
+}
+
+/**
  * Binds the given socket to the port PORT_NUMBER, that was specifed when
  * obtaining the res structure.
  * This function is mostly used when want to create a server, as it is necessary
@@ -215,7 +214,6 @@ void bind_socket(int socketfd, struct addrinfo *res)
  * @param socket used for incomming connections
  * @param backlog max number of incomming connections to be queued.
  */
-
 void listen_socket(int socketfd, int backlog)
 {
     assert(socketfd != -1);
