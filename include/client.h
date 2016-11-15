@@ -31,7 +31,7 @@ struct client_t {
  * @param client client structure
  * @return a connected socket
  */
-int connect_to_server(char *hostname, struct client_t *client);
+int connect_to_server(char *hostname, char *port, struct client_t *client);
 
 /**
  * @brief Disconnects the given client 

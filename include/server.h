@@ -30,6 +30,6 @@ struct server_t {
  * @param server server_t instance that holds all the information to maintain
  * the communication and transmission of messages to/from the client
  */
-void start_server(struct server_t *server);
+void start_server(char *port, struct server_t *server);
 
 #endif /* ifndef GUARD_SERVER */

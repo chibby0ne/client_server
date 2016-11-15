@@ -11,12 +11,15 @@ int main(int argc, char *argv[])
     int mode = handle_input(argc, argv);
     struct client_t *client;
     struct server_t *server;
+    char *port = argv[3] == NULL ? DEFAULT_PORT_NUMBER : argv[3];
     if (mode == CLIENT) {
+        port = argv[3] == NULL ? DEFAULT_PORT_NUMBER : argv[3];
         client = (struct client_t *) malloc(sizeof(struct client_t));
-        connect_to_server(argv[3], client);
+            connect_to_server(argv[2], port, client);
     } else {
+        port = argv[2] == NULL ? DEFAULT_PORT_NUMBER : argv[2];
         server = (struct server_t *) malloc(sizeof(struct server_t));
-        start_server(server);
+        start_server(port, server);
     }
     printf("Made a connection/Started server\n");
 

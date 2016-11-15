@@ -6,14 +6,15 @@
  * @param a hostname or ip address (can be either IPv6 or IPv4)
  * @return a connected socket
  */
-int connect_to_server(char *hostname, struct client_t *client)
+int connect_to_server(char *hostname, char *port, struct client_t *client)
 {
     struct addrinfo hints;
     initialize_hints(&hints, CLIENT);
 
     // getaddrinfo
     struct addrinfo *result;
-    get_addrinfo_list(hostname, PORT_NUMBER, &hints, &result);
+    printf("connecting to %s in port %s\n", hostname, port);
+    get_addrinfo_list(hostname, port, &hints, &result);
 
     // socket
     client->socket_connected = find_connectable_socket(result);

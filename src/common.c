@@ -2,6 +2,13 @@
 #include "client.h"
 #include "server.h"
 
+#include <sys/socket.h>
+#include <sys/types.h>
+#include <netdb.h>
+#include <string.h>
+#include <stdlib.h>
+#include <stdio.h>
+
 /**
  * Initializes the hints structure passed as parameters. according to the flag
  * parameters passed. The family choosen is unspecified i.e: could be either
@@ -40,7 +47,6 @@ void get_addrinfo_list(const char *hostname, const char *port_number, struct
         addrinfo *hints, struct addrinfo **res)
 {
     assert(hostname != "");
-    assert(strtol(PORT_NUMBER, NULL, 10) > 1024);
     printf("preparing addrinfo struct...\n");
     // get the addrinfo structures list with the hints criteria
     int status = getaddrinfo(hostname, port_number, hints, res);
@@ -140,7 +146,6 @@ int connect_through_socket(int socketfd, struct addrinfo *res)
         return 0;
     } else {
         perror("connect_through_socket-connect()");
-        print_ip(res);
         /** 
         * close the file descriptor (socket is a file descriptor), as we
         * couldn't connect through it
@@ -180,11 +185,11 @@ void print_ip(struct addrinfo *res)
  * @param socketfd socket used for conections
  * @param res structure that holds the parameters required to bind socketfd
  */
-void bind_socket(int socketfd, struct addrinfo *res)
+void bind_socket(int socketfd, char *port, struct addrinfo *res)
 {
     assert(socketfd != -1);
     assert(res != NULL);
-    printf("binding socket to port %s\n", PORT_NUMBER);
+    printf("binding socket to port %s\n", port);
     int ret = bind(socketfd, res->ai_addr, res->ai_addrlen);
     if (ret == -1) {
         perror("bind_socket-bind()");
@@ -198,7 +203,7 @@ void bind_socket(int socketfd, struct addrinfo *res)
                 perror("setsockopt");
                 exit(1);
             }
-            printf("freeing port %s...\n", PORT_NUMBER);
+            printf("freeing port %s...\n", port);
         } else {
             exit(EXIT_FAILURE);
         }
@@ -214,10 +219,10 @@ void bind_socket(int socketfd, struct addrinfo *res)
  * @param socket used for incomming connections
  * @param backlog max number of incomming connections to be queued.
  */
-void listen_socket(int socketfd, int backlog)
+void listen_socket(int socketfd, char *port, int backlog)
 {
     assert(socketfd != -1);
-    printf("listening to port: %s\n", PORT_NUMBER);
+    printf("listening to port: %s\n", port);
     int ret = listen(socketfd, backlog);
     if (ret == -1) {
         perror("listen_socket-listen()");
@@ -410,8 +415,8 @@ char *convert_to_lowercase(char *s)
 void print_error_exit()
 {
     fprintf(stderr, 
-            "Usage: client_server MODE [IP]\n MODE: \"client\" or " 
-            "\"server\"\n IP: only used for client mode (could be IP or "
+            "Usage: client_server MODE [IP]\nMODE: \"client\" or " 
+            "\"server\"\nIP: only used for client mode (could be IP or "
             "hostname)\n");
     exit(EXIT_FAILURE);
 
@@ -433,21 +438,55 @@ int is_valid_ip(char *s)
 }
 
 /**
- * Checks if the s contains only alphabetical characters
+ * Checks if the s is a valid hostname
  *
  * @param s contains the hostname of the server to connect to
- * @return 1 if s contains only alphabetical characters, 0 otherwise
+ * @return 1 if s is a valid hostname, 0 otherwise
  */
-int has_alpha_only(char *s)
+int is_valid_hostname(char *s)
 {
     size_t len = sizeof(s);
+    if (len > HOSTNAME_MAX_LENGTH) {
+        return 0;
+    }
+    u_int32_t label_size = 0;
     for (u_int32_t i = 0; i < len; ++i) {
-        if (!isalpha(s[i])) {
+        if (s[i] == '.') {
+            if (s[i - 1] == '.') {
+                return 0;
+            }
+            label_size = 0;
+        } else if (is_label_longer_than_allowed(label_size) ||
+                !is_valid_hostname_char(s[i])) {
             return 0;
         }
+        label_size++;
     }
     return 1;
 }
+
+/**
+ * Checks if label is longer than maximum allowed
+ *
+ * @param number of chars between the last dot (or beginning) and now
+ * @return 1 if it longer than allowed, 0 otherwise
+ */
+int is_label_longer_than_allowed(u_int32_t size_between_dots)
+{
+    return size_between_dots > HOSTNAME_LABEL_MAX_LENGTH;
+}
+
+/**
+ * Checks if c is a valid hostname character
+ *
+ * @param c character to check
+ * @return 1 if c is a valid hostname char, 0 otherwise
+ */
+int is_valid_hostname_char(char c)
+{
+    return (isalpha(c) || c == '-' || c == '_' || c == '.');
+}
+
 
 /**
  * Prints the command line parameters to stdout, including the executable name
@@ -473,25 +512,66 @@ void print_cla(int argc, char *argv[])
 int handle_input(int argc, char *argv[])
 {
     int mode;
-    if (argc < 2 || argc > 3) {
+    if (argc < 2 || argc > 4) {
         print_cla(argc, argv);
         print_error_exit();
     } else {
         if (strcmp("client", convert_to_lowercase(argv[1])) == 0) {
             mode = CLIENT;
+            if (argc == 3) {
+                if (!is_valid_ip(argv[2]) && !is_valid_hostname(argv[2])) {
+                    fprintf(stderr, "Not valid IP or hostname: %s\n", argv[2]);
+                    print_error_exit();
+                }
+            } else if (argc == 4) {
+                if (!is_valid_port(argv[3])) {
+                    fprintf(stderr, "Not valid port number: %s. Enter port "
+                            "number in range: %d - %d\n", argv[3],
+                            MIN_PORT_NUMBER, MAX_PORT_NUMBER);
+                    print_error_exit();
+                }
+            }
         } else if (strcmp("server", convert_to_lowercase(argv[1])) == 0) {
             mode = SERVER;
-        } else {
-            print_cla(argc, argv);
-            print_error_exit();
-        }
-        if (argc == 3) {
-            if (!is_valid_ip(argv[2]) && !has_alpha_only(argv[2])) {
-                print_cla(argc, argv);
+            if (!is_valid_port(argv[2])) {
+                fprintf(stderr, "Not valid port number: %s\n", argv[2]);
                 print_error_exit();
             }
+        } else {
+            fprintf(stderr, "Not a valid mode: %s\n", argv[1]);
+            print_error_exit();
         }
     }
     return mode;
+}
 
+/**
+ * Utility function to aid in debugging of the addrinfo structure returned by
+ * the call to getadrinfo. It prints all the IP address in the addrinfo chain.
+ *
+ * @param  addrinfo structure returned by getaddrinfo()
+ */
+void iterate_over_results(struct addrinfo *results)
+{
+    u_int32_t i = 0;
+    for (struct addrinfo *cur = results; cur != NULL ; cur = cur->ai_next, i++)
+    {
+        printf("Number %d:\n", i);
+        print_ip(cur);
+    }
+}
+
+/**
+ * Checks if s is a valid port number (between 1024 and 49151)
+ *
+ * @param s port number
+ * @return 1 if it is a valid port, 0 otherwise
+ */
+int is_valid_port(char *s)
+{
+    int val = atoi(s);
+    if (val >= MIN_PORT_NUMBER && val <= MAX_PORT_NUMBER) {
+        return 1;
+    }
+    return 0;
 }

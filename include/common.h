@@ -8,7 +8,7 @@
 #define GUARD_COMMON_H
 
 /** Port number used for the program */
-#define PORT_NUMBER "10000"
+#define DEFAULT_PORT_NUMBER "10000"
 
 /** client */
 #define CLIENT 0
@@ -21,6 +21,18 @@
 
 /** max size of sending and receive buffers */
 #define BUFFER_SIZE 200
+
+/** max length of hostname */
+#define HOSTNAME_MAX_LENGTH 253
+
+/** max length of labels in hostname */
+#define HOSTNAME_LABEL_MAX_LENGTH 63
+
+/** minimum port number */
+#define MIN_PORT_NUMBER 1024
+
+/** maximum port number */
+#define MAX_PORT_NUMBER 49151
 
 #include <string.h>
 #include <sys/socket.h>
@@ -133,7 +145,7 @@ void print_ip(struct addrinfo *res);
  * @param socketfd socket used for conections
  * @param result structure that holds the parameters required to bind socketfd
  */
-void bind_socket(int socketfd, struct addrinfo *result);
+void bind_socket(int socketfd, char *port, struct addrinfo *result);
 
 /**
  * Listens to incomming using the socket socketfd, and holds a maximum number of
@@ -144,7 +156,7 @@ void bind_socket(int socketfd, struct addrinfo *result);
  * @param socketfd socket used for incomming connections
  * @param backlog max number of incomming connections to be queued.
  */
-void listen_socket(int socketfd, int backlog);
+void listen_socket(int socketfd, char *port, int backlog);
 
 /**
  * Wrapper for the accept function, that accepts an incoming connections from
@@ -242,12 +254,28 @@ void print_error_exit();
 int is_valid_ip(char *s);
 
 /**
- * Checks if the s contains only alphabetical characters
+ * Checks if the s is a valid hostname
  *
  * @param s contains the hostname of the server to connect to
- * @return 1 if s contains only alphabetical characters, 0 otherwise
+ * @return 1 if s is a valid hostname, 0 otherwise
  */
-int has_alpha_only(char *s);
+int is_valid_hostname(char *s);
+
+/**
+ * Checks if label is longer than maximum allowed
+ *
+ * @param number of chars between the last dot (or beginning) and now
+ * @return 1 if it longer than allowed, 0 otherwise
+ */
+int is_label_longer_than_allowed(u_int32_t label_size);
+
+/**
+ * Checks if c is a valid hostname character
+ *
+ * @param c character to check
+ * @return 1 if c is a valid hostname char, 0 otherwise
+ */
+int is_valid_hostname_char(char c);
 
 /**
  * Checks the command line arguments, validates them, and returns the mode
@@ -258,5 +286,21 @@ int has_alpha_only(char *s);
  * @return the mode to use the program (CLIENT or SERVER)
  */
 int handle_input(int argc, char *argv[]);
+
+/**
+ * Utility function to aid in debugging of the addrinfo structure returned by
+ * the call to getadrinfo. It prints all the IP address in the addrinfo chain.
+ *
+ * @param  addrinfo structure returned by getaddrinfo()
+ */
+void iterate_over_results(struct addrinfo *results);
+
+/**
+ * Checks if s is a valid port number (between 1024 and 49151)
+ *
+ * @param s port number
+ * @return 1 if it is a valid port, 0 otherwise
+ */
+int is_valid_port(char *s);
 
 #endif /* ifndef GUARD_COMMON_H */
