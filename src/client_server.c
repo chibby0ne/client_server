@@ -11,7 +11,7 @@ int main(int argc, char *argv[])
     int mode = handle_input(argc, argv);
     struct client_t *client;
     struct server_t *server;
-    char *port = argv[3] == NULL ? DEFAULT_PORT_NUMBER : argv[3];
+    char *port;
     if (mode == CLIENT) {
         port = argv[3] == NULL ? DEFAULT_PORT_NUMBER : argv[3];
         client = (struct client_t *) malloc(sizeof(struct client_t));
@@ -28,6 +28,7 @@ int main(int argc, char *argv[])
     // only stuff
     int recv_status = 1;
     pthread_t recv_thread;
+    clear_screen();
     if (mode == CLIENT) {
         // create a structure that holds the client and a pointer to recv_status
         struct client_recv_status_t client_recv_status;

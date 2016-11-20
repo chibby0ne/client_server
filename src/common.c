@@ -415,9 +415,10 @@ char *convert_to_lowercase(char *s)
 void print_error_exit()
 {
     fprintf(stderr, 
-            "Usage: client_server MODE [IP]\nMODE: \"client\" or " 
-            "\"server\"\nIP: only used for client mode (could be IP or "
-            "hostname)\n");
+            "Usage: client_server MODE [IP] [PORT]\nMODE: \"client\" or "
+            "\"server\"\nIP: only used and required for client mode (could "
+            "be IP or hostname)\nPORT: to select a specific port, else "
+            "default port is 10000\n");
     exit(EXIT_FAILURE);
 
 }
@@ -496,7 +497,7 @@ int is_valid_hostname_char(char c)
  */
 void print_cla(int argc, char *argv[])
 {
-    for (u_int32_t i = 0; i < argc; ++i) {
+    for (u_int32_t i = 1; i < argc; ++i) {
         printf("argv[%d] = %s\n", i, argv[i]);
     }
 }
@@ -518,24 +519,32 @@ int handle_input(int argc, char *argv[])
     } else {
         if (strcmp("client", convert_to_lowercase(argv[1])) == 0) {
             mode = CLIENT;
-            if (argc == 3) {
+            if (argc == 3 && !is_valid_ip(argv[2]) &&
+                    !is_valid_hostname(argv[2])) {
+                    fprintf(stderr, "Not valid IP or hostname: %s\n", argv[2]);
+                    print_error_exit();
+            } else if (argc == 4) {
                 if (!is_valid_ip(argv[2]) && !is_valid_hostname(argv[2])) {
                     fprintf(stderr, "Not valid IP or hostname: %s\n", argv[2]);
                     print_error_exit();
                 }
-            } else if (argc == 4) {
                 if (!is_valid_port(argv[3])) {
                     fprintf(stderr, "Not valid port number: %s. Enter port "
                             "number in range: %d - %d\n", argv[3],
                             MIN_PORT_NUMBER, MAX_PORT_NUMBER);
                     print_error_exit();
                 }
+            } else {
+                print_cla(argc, argv);
+                print_error_exit();
             }
         } else if (strcmp("server", convert_to_lowercase(argv[1])) == 0) {
             mode = SERVER;
-            if (!is_valid_port(argv[2])) {
-                fprintf(stderr, "Not valid port number: %s\n", argv[2]);
-                print_error_exit();
+            if (argc == 3  && !is_valid_port(argv[2])) {
+                    fprintf(stderr, "Not valid port number: %s. Enter port "
+                            "number in range: %d - %d\n", argv[2],
+                            MIN_PORT_NUMBER, MAX_PORT_NUMBER);
+                    print_error_exit();
             }
         } else {
             fprintf(stderr, "Not a valid mode: %s\n", argv[1]);
@@ -574,4 +583,12 @@ int is_valid_port(char *s)
         return 1;
     }
     return 0;
+}
+
+/**
+ * Clear screen
+ */
+void clear_screen()
+{
+    printf("\033c");
 }

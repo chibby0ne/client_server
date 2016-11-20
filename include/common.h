@@ -34,6 +34,11 @@
 /** maximum port number */
 #define MAX_PORT_NUMBER 49151
 
+/** CSI */
+#define CSI "\033["
+#define CLEAR_SCREEN "2J"
+
+
 #include <string.h>
 #include <sys/socket.h>
 #include <sys/types.h>
@@ -302,5 +307,10 @@ void iterate_over_results(struct addrinfo *results);
  * @return 1 if it is a valid port, 0 otherwise
  */
 int is_valid_port(char *s);
+
+/**
+ * Clears screen
+ */
+void clear_screen();
 
 #endif /* ifndef GUARD_COMMON_H */
