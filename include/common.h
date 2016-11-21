@@ -50,6 +50,7 @@
 #include <assert.h>
 #include <errno.h>
 #include <ctype.h>
+#include <sys/ioctl.h>
 
 /**
  * Utility structure used for it as argument to the thread handling the
@@ -312,5 +313,10 @@ int is_valid_port(char *s);
  * Clears screen
  */
 void clear_screen();
+
+/**
+ * Move cursor to the last row of the terminal
+ */
+void move_cursor_to_last_row();
 
 #endif /* ifndef GUARD_COMMON_H */

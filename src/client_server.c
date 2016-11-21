@@ -25,10 +25,11 @@ int main(int argc, char *argv[])
 
     int send_status;
     // initialize recv_status, because we don't want to leave the loop if we are
-    // only stuff
+    // only sending stuff
     int recv_status = 1;
-    pthread_t recv_thread;
     clear_screen();
+    move_cursor_to_last_row();
+    pthread_t recv_thread;
     if (mode == CLIENT) {
         // create a structure that holds the client and a pointer to recv_status
         struct client_recv_status_t client_recv_status;
@@ -41,7 +42,6 @@ int main(int argc, char *argv[])
             perror("pthread_create");
             exit(EXIT_FAILURE);
         }
-
         // run the sending of outgoing messages in the main thread
         do {
             read_stdin_to_buffer(client->send_buffer);
@@ -59,7 +59,6 @@ int main(int argc, char *argv[])
             perror("pthread_create");
             exit(EXIT_FAILURE);
         }
-
         // run the sending of outgoing messages in the main thread
         do {
             read_stdin_to_buffer(server->send_buffer);

@@ -109,9 +109,9 @@ int find_socket(struct addrinfo *res)
     printf("creating socket...\n");
     int socketfd;
     /**
-    * iterate over the list of addrinfo structure until we find an addressinfo
-    * that we can create a socket from and connect to its address.
-    */
+     * iterate over the list of addrinfo structure until we find an addressinfo
+     * that we can create a socket from and connect to its address.
+     */
     for (struct addrinfo *ai = res;  ai != NULL; ai = ai->ai_next) {
         socketfd = socket(ai->ai_family, ai->ai_socktype, ai->ai_protocol);
 
@@ -139,17 +139,17 @@ int connect_through_socket(int socketfd, struct addrinfo *res)
     assert(res != NULL);
     int ret = connect(socketfd, res->ai_addr, res->ai_addrlen);
     /**
-    * if the socket was successfully connected we stop looking through the
-    * list
-    */
+     * if the socket was successfully connected we stop looking through the
+     * list
+     */
     if (ret == 0) {
         return 0;
     } else {
         perror("connect_through_socket-connect()");
         /** 
-        * close the file descriptor (socket is a file descriptor), as we
-        * couldn't connect through it
-        */
+         * close the file descriptor (socket is a file descriptor), as we
+         * couldn't connect through it
+         */
         close(socketfd);
         return -1;
     }
@@ -381,8 +381,9 @@ void *read_received_message_client(void *client_param)
  */
 void *read_received_message_server(void *server_param)
 {
-    struct server_recv_status_t *server_recv_status = (struct server_recv_status_t *)
-        server_param;
+
+    struct server_recv_status_t *server_recv_status = (struct
+            server_recv_status_t *) server_param;
     struct server_t *server = server_recv_status->server;
     int *status = server_recv_status->recv_status;
     do {
@@ -434,7 +435,7 @@ int is_valid_ip(char *s)
     struct sockaddr_in sa;
     struct sockaddr_in6 sa6;
     int ret = inet_pton(AF_INET, s, &(sa.sin_addr)) ||
-            inet_pton(AF_INET6, s, &(sa6.sin6_addr));
+        inet_pton(AF_INET6, s, &(sa6.sin6_addr));
     return ret == 1;
 }
 
@@ -517,12 +518,15 @@ int handle_input(int argc, char *argv[])
         print_cla(argc, argv);
         print_error_exit();
     } else {
+        printf("here\n");
         if (strcmp("client", convert_to_lowercase(argv[1])) == 0) {
+            printf("it's here now\n");
             mode = CLIENT;
-            if (argc == 3 && !is_valid_ip(argv[2]) &&
-                    !is_valid_hostname(argv[2])) {
+            if (argc == 3) {
+                if (!is_valid_ip(argv[2]) && !is_valid_hostname(argv[2])) {
                     fprintf(stderr, "Not valid IP or hostname: %s\n", argv[2]);
                     print_error_exit();
+                }
             } else if (argc == 4) {
                 if (!is_valid_ip(argv[2]) && !is_valid_hostname(argv[2])) {
                     fprintf(stderr, "Not valid IP or hostname: %s\n", argv[2]);
@@ -541,10 +545,10 @@ int handle_input(int argc, char *argv[])
         } else if (strcmp("server", convert_to_lowercase(argv[1])) == 0) {
             mode = SERVER;
             if (argc == 3  && !is_valid_port(argv[2])) {
-                    fprintf(stderr, "Not valid port number: %s. Enter port "
-                            "number in range: %d - %d\n", argv[2],
-                            MIN_PORT_NUMBER, MAX_PORT_NUMBER);
-                    print_error_exit();
+                fprintf(stderr, "Not valid port number: %s. Enter port "
+                        "number in range: %d - %d\n", argv[2],
+                        MIN_PORT_NUMBER, MAX_PORT_NUMBER);
+                print_error_exit();
             }
         } else {
             fprintf(stderr, "Not a valid mode: %s\n", argv[1]);
@@ -590,5 +594,21 @@ int is_valid_port(char *s)
  */
 void clear_screen()
 {
-    printf("\033c");
+    /* printf("\033c"); */
+    system("tput clear");
+}
+
+/**
+ * Move cursor to the last row of the terminal
+ */
+void move_cursor_to_last_row()
+{
+    struct winsize w;
+    ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
+    char command[20];
+    strncpy(command, "tput cup ", 10);
+    char buffer[10];
+    snprintf(buffer, 10, "%d %d", w.ws_row - 1, 0);
+    strncat(command, buffer, 20);
+    system(command);
 }
