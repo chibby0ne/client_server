@@ -18,7 +18,7 @@ include_directories(${INCLUDE_DIR})
 #
 # Creating main executable target
 add_executable(${PROJECT_NAME} ${SOURCES} ${HEADERS})
-set_property(TARGET ${PROJECT_NAME} PROPERTY C_STANDARD 99)
+set(CMAKE_C_STANDARD 99)
 target_link_libraries(${PROJECT_NAME} pthread)
 
 #########################################
