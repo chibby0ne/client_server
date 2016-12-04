@@ -1,7 +1,7 @@
 ########################################
 #
 # global cmake settings
-cmake_minimum_required(VERSION 3.0)
+cmake_minimum_required(VERSION 3.1)
 
 project(${PROJECT_NAME} client_server)
 
@@ -17,8 +17,9 @@ include_directories(${INCLUDE_DIR})
 #########################################
 #
 # Creating main executable target
-add_executable(${PROJECT_NAME} ${SOURCES} ${HEADERS})
 set(CMAKE_C_STANDARD 99)
+set(CMAKE_C_STANDARD_REQUIRED ON)
+add_executable(${PROJECT_NAME} ${SOURCES} ${HEADERS})
 target_link_libraries(${PROJECT_NAME} pthread)
 
 #########################################

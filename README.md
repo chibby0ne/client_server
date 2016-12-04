@@ -10,3 +10,4 @@
 - [ ] Support for Windows
 - [ ] Auto select as client/server depending on if there is a server (this
   would required some kind of autodiscovery -> UDP Broadcast maybe?)
+- [x] Add Travis CI
