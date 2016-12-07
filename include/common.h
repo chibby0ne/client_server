@@ -131,14 +131,14 @@ int find_socket(struct addrinfo *res);
  * @param res adrinfo structure that holds the connection information
  * @return 0 on success, -1 otherwise
  */
-int connect_through_socket(int socketfd, struct addrinfo *res);
+static int connect_through_socket(int socketfd, struct addrinfo *res);
 
 /**
  * Helper function that prints the ip address from a struct addrinfo to stderr
  *
  * @param res pointer to structure holding the ip address
  */
-void print_ip(struct addrinfo *res);
+static void print_ip(struct addrinfo *res);
 
 /**
  * Binds the given socket to the port PORT_NUMBER, that was specifed when
@@ -186,7 +186,7 @@ int accept_connection(int socketfd, struct sockaddr_storage *addr);
  * @param type indicates whether the object is a CLIENT or SERVER type
  * @return error status of the recv function call
  */
-int receive_message(void *object, int type);
+static int receive_message(void *object, int type);
 
 /**
  * Handles the sending of messages from either a client or a server, using a
@@ -208,7 +208,7 @@ int send_message(void *object, int type);
  * @param buffer char array where the message is stored
  * @param type CLIENT or SERVER int macros
  */
-void show_message(char *buffer, int type);
+static void show_message(char *buffer, int type);
 
 /**
  * Reads strings from stdin and stores it in a buffer up to the EOF or the
@@ -244,12 +244,12 @@ void *read_received_message_server(void *server_param);
  * @param s string with characters in lower and/or upper case
  * @return string with characters in lower case
  */
-char *convert_to_lowercase(char *s);
+static char *convert_to_lowercase(char *s);
 
 /**
  * Helper function used for showing fatal error messages on stderr
  */
-void print_error_exit();
+static void print_error_exit();
 
 /**
  * Checks if the string corresponds to a valid ip address
@@ -257,7 +257,7 @@ void print_error_exit();
  * @param s contains the ip address
  * @return 1 if s is valid, 0 otherwise
  */
-int is_valid_ip(char *s);
+static int is_valid_ip(char *s);
 
 /**
  * Checks if the s is a valid hostname
@@ -265,7 +265,7 @@ int is_valid_ip(char *s);
  * @param s contains the hostname of the server to connect to
  * @return 1 if s is a valid hostname, 0 otherwise
  */
-int is_valid_hostname(char *s);
+static int is_valid_hostname(char *s);
 
 /**
  * Checks if label is longer than maximum allowed
@@ -273,7 +273,7 @@ int is_valid_hostname(char *s);
  * @param number of chars between the last dot (or beginning) and now
  * @return 1 if it longer than allowed, 0 otherwise
  */
-int is_label_longer_than_allowed(u_int32_t label_size);
+static int is_label_longer_than_allowed(u_int32_t label_size);
 
 /**
  * Checks if c is a valid hostname character
@@ -281,7 +281,15 @@ int is_label_longer_than_allowed(u_int32_t label_size);
  * @param c character to check
  * @return 1 if c is a valid hostname char, 0 otherwise
  */
-int is_valid_hostname_char(char c);
+static int is_valid_hostname_char(char c);
+
+/**
+ * Prints the command line parameters to stdout, including the executable name
+ *
+ * @param argc number of command line arguments (including the executable)
+ * @param argv array of strings representing command line arguments
+ */
+static void print_cla(int argc, char *argv[]);
 
 /**
  * Checks the command line arguments, validates them, and returns the mode
@@ -299,7 +307,7 @@ int handle_input(int argc, char *argv[]);
  *
  * @param  addrinfo structure returned by getaddrinfo()
  */
-void iterate_over_results(struct addrinfo *results);
+static void iterate_over_results(struct addrinfo *results);
 
 /**
  * Checks if s is a valid port number (between 1024 and 49151)
@@ -307,7 +315,7 @@ void iterate_over_results(struct addrinfo *results);
  * @param s port number
  * @return 1 if it is a valid port, 0 otherwise
  */
-int is_valid_port(char *s);
+static int is_valid_port(char *s);
 
 /**
  * Clears screen

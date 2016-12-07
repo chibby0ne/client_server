@@ -22,7 +22,7 @@ void initialize_hints(struct addrinfo *hints, int flag)
 {
     assert(flag == SERVER || flag == CLIENT);
     // initialize hints to 0
-    memset(hints, 0, sizeof(hints));
+    memset(hints, 0, sizeof(*hints));
     hints->ai_family = AF_UNSPEC;
     hints->ai_socktype = SOCK_STREAM;
     if (flag == SERVER) {
@@ -133,7 +133,7 @@ int find_socket(struct addrinfo *res)
  * 
  * @return 0 on success, -1 otherwise
  */
-int connect_through_socket(int socketfd, struct addrinfo *res)
+static int connect_through_socket(int socketfd, struct addrinfo *res)
 {
     assert(socketfd != -1);
     assert(res != NULL);
@@ -161,7 +161,7 @@ int connect_through_socket(int socketfd, struct addrinfo *res)
  *
  * @param res pointer to structure holding the ip address
  */
-void print_ip(struct addrinfo *res)
+static void print_ip(struct addrinfo *res)
 {
     char ipstr[INET6_ADDRSTRLEN];
     if (res->ai_family ==  AF_INET) {
@@ -265,7 +265,7 @@ int accept_connection(int socketfd, struct sockaddr_storage *addr)
  * @param type indicates whether the object is a CLIENT or SERVER type
  * @return error status of the recv function call
  */
-int receive_message(void *object, int type)
+static int receive_message(void *object, int type)
 {
     int status = 0;
     struct client_t *client;
@@ -335,7 +335,7 @@ int send_message(void *object, int type)
  * @param buffer char array where the message is stored
  * @param type CLIENT or SERVER int macros
  */
-void show_message(char *buffer, int type)
+static void show_message(char *buffer, int type)
 {
     printf("%s %s", type == CLIENT ? "From server:" : "From client:", buffer);
 }
@@ -400,7 +400,7 @@ void *read_received_message_server(void *server_param)
  * @param s string with characters in lower and/or upper case
  * @return string with characters in lower case
  */
-char *convert_to_lowercase(char *s)
+static char *convert_to_lowercase(char *s)
 {
     size_t len = sizeof(s);
     char *new_s = (char *) malloc(len);
@@ -413,7 +413,7 @@ char *convert_to_lowercase(char *s)
 /**
  * Helper function used for showing fatal error messages on stderr
  */
-void print_error_exit()
+static void print_error_exit()
 {
     fprintf(stderr, 
             "Usage: client_server MODE [IP] [PORT]\nMODE: \"client\" or "
@@ -430,7 +430,7 @@ void print_error_exit()
  * @param s contains the ip address
  * @return 1 if s is valid, 0 otherwise
  */
-int is_valid_ip(char *s)
+static int is_valid_ip(char *s)
 {
     struct sockaddr_in sa;
     struct sockaddr_in6 sa6;
@@ -445,7 +445,7 @@ int is_valid_ip(char *s)
  * @param s contains the hostname of the server to connect to
  * @return 1 if s is a valid hostname, 0 otherwise
  */
-int is_valid_hostname(char *s)
+static int is_valid_hostname(char *s)
 {
     size_t len = sizeof(s);
     if (len > HOSTNAME_MAX_LENGTH) {
@@ -473,7 +473,7 @@ int is_valid_hostname(char *s)
  * @param number of chars between the last dot (or beginning) and now
  * @return 1 if it longer than allowed, 0 otherwise
  */
-int is_label_longer_than_allowed(u_int32_t size_between_dots)
+static int is_label_longer_than_allowed(u_int32_t size_between_dots)
 {
     return size_between_dots > HOSTNAME_LABEL_MAX_LENGTH;
 }
@@ -484,7 +484,7 @@ int is_label_longer_than_allowed(u_int32_t size_between_dots)
  * @param c character to check
  * @return 1 if c is a valid hostname char, 0 otherwise
  */
-int is_valid_hostname_char(char c)
+static int is_valid_hostname_char(char c)
 {
     return (isalpha(c) || c == '-' || c == '_' || c == '.');
 }
@@ -496,7 +496,7 @@ int is_valid_hostname_char(char c)
  * @param argc number of command line arguments (including the executable)
  * @param argv array of strings representing command line arguments
  */
-void print_cla(int argc, char *argv[])
+static void print_cla(int argc, char *argv[])
 {
     for (u_int32_t i = 1; i < argc; ++i) {
         printf("argv[%d] = %s\n", i, argv[i]);
@@ -518,9 +518,7 @@ int handle_input(int argc, char *argv[])
         print_cla(argc, argv);
         print_error_exit();
     } else {
-        printf("here\n");
         if (strcmp("client", convert_to_lowercase(argv[1])) == 0) {
-            printf("it's here now\n");
             mode = CLIENT;
             if (argc == 3) {
                 if (!is_valid_ip(argv[2]) && !is_valid_hostname(argv[2])) {
@@ -564,7 +562,7 @@ int handle_input(int argc, char *argv[])
  *
  * @param  addrinfo structure returned by getaddrinfo()
  */
-void iterate_over_results(struct addrinfo *results)
+static void iterate_over_results(struct addrinfo *results)
 {
     u_int32_t i = 0;
     for (struct addrinfo *cur = results; cur != NULL ; cur = cur->ai_next, i++)
@@ -580,7 +578,7 @@ void iterate_over_results(struct addrinfo *results)
  * @param s port number
  * @return 1 if it is a valid port, 0 otherwise
  */
-int is_valid_port(char *s)
+static int is_valid_port(char *s)
 {
     int val = atoi(s);
     if (val >= MIN_PORT_NUMBER && val <= MAX_PORT_NUMBER) {
