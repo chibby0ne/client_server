@@ -3,7 +3,7 @@
 # global cmake settings
 cmake_minimum_required(VERSION 3.1)
 
-project(${PROJECT_NAME} client_server)
+project(client_server)
 
 ##########################################
 #
@@ -21,6 +21,10 @@ set(CMAKE_C_STANDARD 99)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 add_executable(${PROJECT_NAME} ${SOURCES} ${HEADERS})
 target_link_libraries(${PROJECT_NAME} pthread)
+
+
+# Install target
+install(TARGETS ${PROJECT_NAME} DESTINATION bin)
 
 #########################################
 #
